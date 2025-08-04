@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentForge - AI Agent Ecosystem</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #3b82f6;
+            --secondary: #0f172a;
+            --secondary-light: #1e293b;
+            --accent: #8b5cf6;
+            --accent-light: #a78bfa;
+            --light: #f1f5f9;
+            --dark: #0f172a;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --terminal: #0a0e17;
+            --card-bg: rgba(30, 41, 59, 0.6);
+            --card-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: var(--light);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+            background-attachment: fixed;
+        }
+        
+        header {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            width: 100%;
+            z-index: 1000;
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--light);
+        }
+        
+        .logo i {
+            color: var(--accent);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        
+        nav a {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            font-size: 1.1rem;
+            position: relative;
+        }
+        
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s;
+        }
+        
+        nav a:hover::after {
+            width: 100%;
+        }
+        
+        .cta-button {
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+        
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 0 5%;
+            position: relative;
+            overflow: hidden;
+            padding-top: 80px;
+        }
+        
+        .hero-content {
+            max-width: 650px;
+            z-index: 2;
+            padding-top: 20px;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            background: linear-gradient(90deg, var(--light), var(--accent-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            max-width: 600px;
+        }
+        
+        .hero-bg {
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            width: 50%;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, rgba(15, 23, 42, 0) 70%);
+            z-index: 1;
+        }
+        
+        .ai-visualization {
+            position: absolute;
+            right: 10%;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40%;
+            max-width: 500px;
+            z-index: 2;
+        }
+        
+        .agent-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .agent-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            transition: all 0.3s;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .agent-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+        
+        .agent-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .agent-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+        }
+        
+        .agent-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .agent-description {
+            flex-grow: 1;
+            opacity: 0.8;
+            margin-bottom: 15px;
+        }
+        
+        .agent-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+        }
+        
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            color: white;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary-light);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .section {
+            padding: 6rem 5%;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        
+        .section-title h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 15px;
+        }
+        
+        .section-title h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 2px;
+        }
+        
+        .section-title p {
+            max-width: 700px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+        
+        .terminal {
+            background: var(--terminal);
+            border-radius: 10px;
+            padding: 1.5rem;
+            font-family: 'Courier New', monospace;
+            margin-top: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 1000px;
+            margin: 2rem auto;
+        }
+        
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .terminal-dots {
+            display: flex;
+            gap: 6px;
+            margin-right: 10px;
+        }
+        
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .dot-red { background: #ff5f56; }
+        .dot-yellow { background: #ffbd2e; }
+        .dot-green { background: #27c93f; }
+        
+        .terminal-title {
+            flex-grow: 1;
+            text-align: center;
+            font-weight: 500;
+            opacity: 0.8;
+        }
+        
+        .terminal-body {
+            min-height: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+        
+        .terminal-input {
+            display: flex;
+            margin-top: 1rem;
+            gap: 10px;
+        }
+        
+        .terminal-input input {
+            flex-grow: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            padding: 0.8rem;
+            color: white;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .terminal-input button {
+            background: var(--primary);
+            border: none;
+            border-radius: 5px;
+            padding: 0 1.5rem;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .code-generator {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-top: 2rem;
+            border: 1px solid var(--card-border);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .form-group select, 
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+        }
+        
+        .form-group textarea {
+            min-height: 150px;
+        }
+        
+        .code-output {
+            margin-top: 2rem;
+            background: var(--terminal);
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: 'Courier New', monospace;
+            min-height: 200px;
+            max-height: 400px;
+            overflow: auto;
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .pricing-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            border: 1px solid var(--card-border);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .pricing-card.featured {
+            transform: scale(1.05);
+            border-color: var(--accent);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .pricing-card.featured::before {
+            content: "RECOMMENDED";
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .pricing-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+        
+        .price {
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 1.5rem 0;
+            color: var(--accent);
+        }
+        
+        .price span {
+            font-size: 1rem;
+            opacity: 0.7;
+        }
+        
+        .pricing-features {
+            list-style: none;
+            margin: 2rem 0;
+            text-align: left;
+            flex-grow: 1;
+        }
+        
+        .pricing-features li {
+            padding: 0.7rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+        }
+        
+        .pricing-features li:last-child {
+            border-bottom: none;
+        }
+        
+        .pricing-features li i {
+            color: var(--success);
+            margin-right: 10px;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .feature-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            border: 1px solid var(--card-border);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        footer {
+            padding: 4rem 5% 2rem;
+            background: var(--secondary);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 4rem;
+        }
+        
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto 3rem;
+        }
+        
+        .footer-col h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+        
+        .footer-col h3::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -10px;
+            width: 50px;
+            height: 3px;
+            background: var(--accent);
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+        
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .social-links a:hover {
+            background: var(--accent);
+            transform: translateY(-3px);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0.7;
+        }
+        
+        .animated {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        
+        .fade-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        @media (max-width: 992px) {
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+            
+            .ai-visualization {
+                display: none;
+            }
+            
+            .hero-content {
+                max-width: 100%;
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            nav ul {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 2.3rem;
+            }
+            
+            .section-title h2 {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .agent-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <i class="fas fa-robot"></i>
+            <span>AgentForge</span>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#agents">Agents</a></li>
+                <li><a href="#create">Create</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+            </ul>
+        </nav>
+        <a href="#create" class="cta-button">
+            <i class="fas fa-bolt"></i> Get Started
+        </a>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Create Custom AI Agents That Build More Agents</h1>
+            <p>Revolutionary AI ecosystem that designs, deploys, and manages specialized agents to handle any project from app development to financial security.</p>
+            <div class="hero-actions">
+                <a href="#agents" class="cta-button">
+                    <i class="fas fa-eye"></i> Explore Agents
+                </a>
+                <a href="#create" class="btn btn-outline">
+                    <i class="fas fa-code"></i> Create Now
+                </a>
+            </div>
+        </div>
+        <div class="hero-bg"></div>
+    </section>
+
+    <!-- Agents Section -->
+    <section id="agents" class="section">
+        <div class="section-title">
+            <h2>AI Agent Ecosystem</h2>
+            <p>Our Director Agent creates and manages specialized sub-agents to handle every aspect of your project</p>
+        </div>
+        
+        <div class="agent-grid">
+            <!-- Director Agent -->
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3 class="agent-title">Director Agent</h3>
+                </div>
+                <p class="agent-description">The master controller that creates and coordinates all other agents in the ecosystem.</p>
+                <div class="agent-actions">
+                    <button class="btn btn-primary" onclick="createAgent('director')">
+                        <i class="fas fa-plus"></i> Create
+                    </button>
+                    <button class="btn btn-outline" onclick="showAgentInfo('director')">
+                        <i class="fas fa-info-circle"></i> Details
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Marketing Agent -->
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-icon">
+                        <i class="fas fa-bullhorn"></i>
+                    </div>
+                    <h3 class="agent-title">Marketing Agent</h3>
+                </div>
+                <p class="agent-description">Promotes your services across all digital channels with optimized campaigns.</p>
+                <div class="agent-actions">
+                    <button class="btn btn-primary" onclick="createAgent('marketing')">
+                        <i class="fas fa-plus"></i> Create
+                    </button>
+                    <button class="btn btn-outline" onclick="showAgentInfo('marketing')">
+                        <i class="fas fa-info-circle"></i> Details
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Social Media Agent -->
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-icon">
+                        <i class="fas fa-hashtag"></i>
+                    </div>
+                    <h3 class="agent-title">Social Media Agent</h3>
+                </div>
+                <p class="agent-description">Manages and posts content across all platforms 24/7.</p>
+                <div class="agent-actions">
+                    <button class="btn btn-primary" onclick="createAgent('social_media')">
+                        <i class="fas fa-plus"></i> Create
+                    </button>
+                    <button class="btn btn-outline" onclick="showAgentInfo('social_media')">
+                        <i class="fas fa-info-circle"></i> Details
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Security Agent -->
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="agent-title">Security Agent</h3>
+                </div>
+                <p class="agent-description">Military-grade protection against theft, cloning, and unauthorized access.</p>
+                <div class="agent-actions">
+                    <button class="btn btn-primary" onclick="createAgent('security')">
+                        <i class="fas fa-plus"></i> Create
+                    </button>
+                    <button class="btn btn-outline" onclick="showAgentInfo('security')">
+                        <i class="fas fa-info-circle"></i> Details
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Self-Healing Agent -->
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <h3 class="agent-title">Self-Healing Agent</h3>
+                </div>
+                <p class="agent-description">Automatically updates, repairs, and improves the system without downtime.</p>
+                <div class="agent-actions">
+                    <button class="btn btn-primary" onclick="createAgent('self_healing')">
+                        <i class="fas fa-plus"></i> Create
+                    </button>
+                    <button class="btn btn-outline" onclick="showAgentInfo('self_healing')">
+                        <i class="fas fa-info-circle"></i> Details
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Training Agent -->
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 class="agent-title">Training Agent</h3>
+                </div>
+                <p class="agent-description">Trains and retrains models using the latest data to maintain peak performance.</p>
+                <div class="agent-actions">
+                    <button class="btn btn-primary" onclick="createAgent('training')">
+                        <i class="fas fa-plus"></i> Create
+                    </button>
+                    <button class="btn btn-outline" onclick="showAgentInfo('training')">
+                        <i class="fas fa-info-circle"></i> Details
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Compliance Agent -->
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-icon">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <h3 class="agent-title">Compliance Agent</h3>
+                </div>
+                <p class="agent-description">Ensures all operations meet South African and international regulatory requirements.</p>
+                <div class="agent-actions">
+                    <button class="btn btn-primary" onclick="createAgent('compliance')">
+                        <i class="fas fa-plus"></i> Create
+                    </button>
+                    <button class="btn btn-outline" onclick="showAgentInfo('compliance')">
+                        <i class="fas fa-info-circle"></i> Details
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Payments Agent -->
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <h3 class="agent-title">Payments Agent</h3>
+                </div>
+                <p class="agent-description">Handles all financial transactions, distributions, and upgrades.</p>
+                <div class="agent-actions">
+                    <button class="btn btn-primary" onclick="createAgent('payments')">
+                        <i class="fas fa-plus"></i> Create
+                    </button>
+                    <button class="btn btn-outline" onclick="showAgentInfo('payments')">
+                        <i class="fas fa-info-circle"></i> Details
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Creation Section -->
+    <section id="create" class="section" style="background: rgba(15, 23, 42, 0.5);">
+        <div class="section-title">
+            <h2>Create & Generate</h2>
+            <p>Build custom apps, scripts, and AI agents directly from your browser</p>
+        </div>
+        
+        <div class="terminal">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="terminal-dot dot-red"></div>
+                    <div class="terminal-dot dot-yellow"></div>
+                    <div class="terminal-dot dot-green"></div>
+                </div>
+                <div class="terminal-title">AgentForge Terminal</div>
+            </div>
+            <div class="terminal-body" id="terminal-output">
+                <div class="terminal-line">AgentForge Terminal v1.0 - Type 'help' for commands</div>
+                <div class="terminal-line">> Initializing Director Agent...</div>
+                <div class="terminal-line success">> Director Agent initialized successfully</div>
+                <div class="terminal-line">> Ready to create agents and generate code</div>
+            </div>
+            <div class="terminal-input">
+                <input type="text" id="terminal-input" placeholder="Enter command (e.g., create marketing_agent)">
+                <button onclick="processCommand()">Run</button>
+            </div>
+        </div>
+        
+        <div class="code-generator">
+            <h3>Code Generator</h3>
+            <p>Describe what you want to build, and our AI will generate the code</p>
+            
+            <div class="form-group">
+                <label for="language">Programming Language</label>
+                <select id="language">
+                    <option value="python">Python</option>
+                    <option value="javascript">JavaScript</option>
+                    <option value="html">HTML/CSS</option>
+                    <option value="java">Java</option>
+                    <option value="csharp">C#</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Describe what you want to build</label>
+                <textarea id="description" placeholder="Describe the functionality you want to create..."></textarea>
+            </div>
+            
+            <button class="cta-button" onclick="generateCode()">
+                <i class="fas fa-code"></i> Generate Code
+            </button>
+            
+            <div class="code-output" id="code-output">
+                // Generated code will appear here
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="section">
+        <div class="section-title">
+            <h2>Advanced Features</h2>
+            <p>Our AI ecosystem comes with powerful capabilities for complex projects</p>
+        </div>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h3>Agent Creation</h3>
+                <p>Director Agent can create specialized agents on demand for any task</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-sync"></i>
+                </div>
+                <h3>Self-Healing</h3>
+                <p>Automatically detects and fixes issues without human intervention</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3>Military Security</h3>
+                <p>Advanced protection against cloning, theft, and cyber attacks</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h3>Continuous Training</h3>
+                <p>Models constantly improve with new data and experiences</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-balance-scale"></i>
+                </div>
+                <h3>Auto Compliance</h3>
+                <p>Ensures all operations meet South African and international laws</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <h3>Payment Automation</h3>
+                <p>Handles all financial transactions and distributions</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="section" style="background: rgba(15, 23, 42, 0.5);">
+        <div class="section-title">
+            <h2>Flexible Pricing</h2>
+            <p>Start with our free tier and automatically upgrade as your needs grow</p>
+        </div>
+        
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <h3>Starter</h3>
+                <div class="price">Free</div>
+                <p>Perfect for individuals and small projects</p>
+                <ul class="pricing-features">
+                    <li><i class="fas fa-check"></i> Basic Director Agent</li>
+                    <li><i class="fas fa-check"></i> 2 Sub-Agents</li>
+                    <li><i class="fas fa-check"></i> Community Support</li>
+                    <li><i class="fas fa-check"></i> Free AI Tools</li>
+                    <li><i class="fas fa-times"></i> Auto-Upgrade</li>
+                    <li><i class="fas fa-times"></i> Advanced Security</li>
+                </ul>
+                <a href="#" class="cta-button">Get Started</a>
+            </div>
+            
+            <div class="pricing-card featured">
+                <h3>Professional</h3>
+                <div class="price">R899<span>/month</span></div>
+                <p>For growing businesses and serious projects</p>
+                <ul class="pricing-features">
+                    <li><i class="fas fa-check"></i> Advanced Director Agent</li>
+                    <li><i class="fas fa-check"></i> 8 Sub-Agents</li>
+                    <li><i class="fas fa-check"></i> Priority Support</li>
+                    <li><i class="fas fa-check"></i> Mixed AI Tools</li>
+                    <li><i class="fas fa-check"></i> Auto-Upgrade System</li>
+                    <li><i class="fas fa-check"></i> Enhanced Security</li>
+                </ul>
+                <a href="#" class="cta-button">Get Started</a>
+            </div>
+            
+            <div class="pricing-card">
+                <h3>Enterprise</h3>
+                <div class="price">Custom</div>
+                <p>For large organizations with complex needs</p>
+                <ul class="pricing-features">
+                    <li><i class="fas fa-check"></i> Unlimited Agents</li>
+                    <li><i class="fas fa-check"></i> Dedicated AI Cluster</li>
+                    <li><i class="fas fa-check"></i> 24/7 Premium Support</li>
+                    <li><i class="fas fa-check"></i> Paid AI Tools</li>
+                    <li><i class="fas fa-check"></i> Full Auto-Upgrade</li>
+                    <li><i class="fas fa-check"></i> Military-Grade Security</li>
+                </ul>
+                <a href="#" class="cta-button">Contact Sales</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <div class="logo">
+                    <i class="fas fa-robot"></i>
+                    <span>AgentForge</span>
+                </div>
+                <p>Creating intelligent agent ecosystems that build more intelligent agents to solve your most complex challenges.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#"><i class="fab fa-tiktok"></i></a>
+                </div>
+            </div>
+            
+            <div class="footer-col">
+                <h3>Services</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Custom App Development</a></li>
+                    <li><a href="#">AI Agent Creation</a></li>
+                    <li><a href="#">Algorithm Development</a></li>
+                    <li><a href="#">Financial Security Systems</a></li>
+                    <li><a href="#">AI Ecosystem Deployment</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-col">
+                <h3>Company</h3>
+                <ul class="footer-links">
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Our Technology</a></li>
+                    <li><a href="#">Case Studies</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-col">
+                <h3>Contact Us</h3>
+                <ul class="footer-links">
+                    <li><i class="fas fa-map-marker-alt"></i> Cape Town, South Africa</li>
+                    <li><i class="fas fa-phone"></i> +27 21 123 4567</li>
+                    <li><i class="fas fa-envelope"></i> info@agentforge.co.za</li>
+                    <li><i class="fas fa-clock"></i> Mon-Fri: 9AM - 5PM SAST</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            <p>&copy; 2023 AgentForge. All rights reserved. | Compliant with South Africa's POPI Act</p>
+        </div>
+    </footer>
+
+    <script>
+        // Animation on scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            const animatedElements = document.querySelectorAll('.animated');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('fade-in');
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+            
+            animatedElements.forEach(element => {
+                observer.observe(element);
+            });
+            
+            // Initialize code highlighter
+            hljs.highlightAll();
+        });
+        
+        // Agent creation functions
+        function createAgent(agentType) {
+            const terminal = document.getElementById('terminal-output');
+            const agentNames = {
+                'director': 'Director Agent',
+                'marketing': 'Marketing Agent',
+                'social_media': 'Social Media Agent',
+                'security': 'Security Agent',
+                'self_healing': 'Self-Healing Agent',
+                'training': 'Training Agent',
+                'compliance': 'Compliance Agent',
+                'payments': 'Payments Agent'
+            };
+            
+            terminal.innerHTML += `<div class="terminal-line">> Creating ${agentNames[agentType]}...</div>`;
+            terminal.scrollTop = terminal.scrollHeight;
+            
+            // Simulate agent creation
+            setTimeout(() => {
+                terminal.innerHTML += `<div class="terminal-line success">> ${agentNames[agentType]} created successfully! Agent ID: AG-${Math.floor(Math.random() * 10000)}</div>`;
+                terminal.scrollTop = terminal.scrollHeight;
+            }, 1500);
+        }
+        
+        function showAgentInfo(agentType) {
+            const agentInfo = {
+                'director': 'The Director Agent manages all other agents in the ecosystem. It can create new agents, assign tasks, and coordinate complex projects.',
+                'marketing': 'The Marketing Agent creates and manages digital marketing campaigns across all channels. It analyzes performance and optimizes strategies.',
+                'social_media': 'This agent posts content to all social platforms (Facebook, Instagram, Twitter, TikTok, etc.) and engages with your audience.',
+                'security': 'Security Agent provides military-grade protection with encryption, threat detection, and anti-cloning measures.',
+                'self_healing': 'This agent continuously monitors the system, automatically fixing issues and applying updates without downtime.',
+                'training': 'Training Agent manages model training and retraining processes using the latest data and techniques.',
+                'compliance': 'Ensures all operations comply with South African (POPI) and international regulations. Automates compliance reporting.',
+                'payments': 'Handles all financial transactions, distributions to owners, and automatic upgrades to paid services.'
+            };
+            
+            alert(agentInfo[agentType]);
+        }
+        
+        // Terminal command processing
+        function processCommand() {
+            const input = document.getElementById('terminal-input');
+            const command = input.value.trim().toLowerCase();
+            const terminal = document.getElementById('terminal-output');
+            
+            if (!command) return;
+            
+            terminal.innerHTML += `<div class="terminal-line">> ${command}</div>`;
+            
+            if (command === 'help') {
+                terminal.innerHTML += `<div class="terminal-line">Available commands:</div>`;
+                terminal.innerHTML += `<div class="terminal-line">- create [agent_type] - Creates a new agent (e.g., create marketing_agent)</div>`;
+                terminal.innerHTML += `<div class="terminal-line">- list_agents - Shows all active agents</div>`;
+                terminal.innerHTML += `<div class="terminal-line">- run_task [agent_id] [task] - Executes a task on an agent</div>`;
+                terminal.innerHTML += `<div class="terminal-line">- generate_code [language] [description] - Generates code based on description</div>`;
+                terminal.innerHTML += `<div class="terminal-line">- clear - Clears the terminal</div>`;
+            }
+            else if (command.startsWith('create ')) {
+                const agentType = command.split(' ')[1];
+                createAgent(agentType);
+            }
+            else if (command === 'list_agents') {
+                terminal.innerHTML += `<div class="terminal-line">Active agents:</div>`;
+                terminal.innerHTML += `<div class="terminal-line">- Director Agent (AG-1001)</div>`;
+                terminal.innerHTML += `<div class="terminal-line">- Marketing Agent (AG-2004)</div>`;
+                terminal.innerHTML += `<div class="terminal-line">- Security Agent (AG-3007)</div>`;
+            }
+            else if (command === 'clear') {
+                terminal.innerHTML = '';
+            }
+            else {
+                terminal.innerHTML += `<div class="terminal-line error">Unknown command: ${command}. Type 'help' for available commands.</div>`;
+            }
+            
+            input.value = '';
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+        
+        // Code generation
+        function generateCode() {
+            const language = document.getElementById('language').value;
+            const description = document.getElementById('description').value;
+            const output = document.getElementById('code-output');
+            
+            if (!description) {
+                alert('Please enter a description of what you want to build');
+                return;
+            }
+            
+            output.innerHTML = '<div class="terminal-line">Generating code... Please wait</div>';
+            
+            // Simulate code generation
+            setTimeout(() => {
+                let code = '';
+                
+                if (language === 'python') {
+                    code = `# ${description}\n\ndef main():\n    print("Hello from AgentForge!")\n\nif __name__ == "__main__":\n    main()`;
+                }
+                else if (language === 'javascript') {
+                    code = `// ${description}\n\nfunction main() {\n    console.log("Hello from AgentForge!");\n}\n\nmain();`;
+                }
+                else if (language === 'html') {
+                    code = `<!-- ${description} -->\n<!DOCTYPE html>\n<html>\n<head>\n    <title>AgentForge App</title>\n</head>\n<body>\n    <h1>Hello from AgentForge!</h1>\n</body>\n</html>`;
+                }
+                else {
+                    code = `// Generated ${language} code\n// ${description}\n\n// Code generation for ${language} is supported`;
+                }
+                
+                output.textContent = code;
+                hljs.highlightElement(output);
+            }, 2000);
+        }
+        
+        // Handle Enter key in terminal
+        document.getElementById('terminal-input').addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                processCommand();
+            }
+        });
+    </script>
+</body>
+</html>
